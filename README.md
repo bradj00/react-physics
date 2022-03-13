@@ -7,7 +7,7 @@ A mini-game in progress recreating BrickBreak in a React framework. This uses:
 
 * web3.JS for Ethereum wallet integration and high scores
 
-* Moralis SDK for data rich stats
+* Moralis SDK for data rich stats and realtime events
 
 
 
