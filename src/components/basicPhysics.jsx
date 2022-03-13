@@ -6,8 +6,6 @@ export const MatterStepOne = () => {
   const boxRef = useRef(null)
   const canvasRef = useRef(null)
 
-
-
   const maxHeight = 900;
   const maxWidth = 1900;
 
@@ -17,13 +15,20 @@ export const MatterStepOne = () => {
   let Bodies = Matter.Bodies
   let engine = Engine.create({})
   
-  let paddle = Bodies.rectangle(200, 850, 150, 20, { render: { fillStyle: '#ccc', }, });
-  
+  let paddle = Bodies.rectangle(200, 850, 150, 20, {
+    render: { fillStyle: '#ccc', },
+    inertia: Infinity,
+    mass: Infinity,
+    restitution: 0,
+    });
+  // Matter.Body.setStatic(paddle, true);
+
   let ball = Bodies.circle(250, 0, 10, {
-    restitution: 1,
+    restitution: 1, 
     render: {
       fillStyle: 'blue',
     },
+    frictionAir: 0
   })
 
   useEffect(() => {
@@ -41,17 +46,7 @@ export const MatterStepOne = () => {
       },
     })
 
-    // const floor = Bodies.rectangle(150, 800, 3500, 20, {
-    //   isStatic: true,
-    //   render: {
-    //     fillStyle: 'blue',
-    //   },
-    // })
-
    
-
-
-
 
     let ballArray = [];          
     for (let i = 0; i < 100; i++){
@@ -66,8 +61,6 @@ export const MatterStepOne = () => {
     }
 
 
-
-    // World.add(engine.world, [floor])
     World.add(engine.world, [ball])
     World.add(engine.world, [paddle])
 
@@ -76,14 +69,11 @@ export const MatterStepOne = () => {
     Render.run(render)
   }, [])
 
-  // function showCoords(event) {
-  //   console.log(paddle);
-  // }
 
-  function setVel() {
-    // Matter.Body.setAngularVelocity(ball, 0.02);
+  function setBallInMotion() {
+
     console.log(ball.position.x, ball.position.y);
-    Matter.Body.applyForce( ball, {x: ball.position.x, y: ball.position.y}, {x: 0, y: 0.01})
+    Matter.Body.applyForce( ball, {x: ball.position.x, y: ball.position.y}, {x: 0, y: 0.001})
   }
 
  
@@ -91,7 +81,12 @@ export const MatterStepOne = () => {
   function movePaddle(event) {
     var x = event.clientX;
     var y = event.clientY;
-    paddle.position.x = event.clientX;
+    if (y < (maxHeight - 150) ){
+      y = maxHeight - 150;
+    }
+    Matter.Body.setPosition(paddle,  { x: event.clientX, y: y });
+    // paddle.position.x = event.clientX;
+    // Matter.Body.setStatic(paddle, true);
     // paddle.position.y = event.clientY;
     // console.log(paddle);
   }
@@ -104,7 +99,7 @@ export const MatterStepOne = () => {
         height: maxHeight,
       }}
       onMouseMove={(e)=>{movePaddle(e)}}
-      onClick={()=>{setVel()}}
+      onClick={()=>{setBallInMotion()}}
     >
       <canvas ref={canvasRef} />
     </div>
