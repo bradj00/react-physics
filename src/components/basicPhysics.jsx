@@ -15,22 +15,60 @@ export const MatterStepOne = () => {
   let Render = Matter.Render
   let World = Matter.World
   let Bodies = Matter.Bodies
-  let engine = Engine.create({})
+  let engine = Engine.create({
+
+
+  })
   
+  let wallLeft = Bodies.rectangle(1, 1, 20, maxHeight*2, {
+    isStatic: true,
+    friction: 0,
+    frictionAir: 0,
+    frictionStick: 0,
+  });
+  let wallRight = Bodies.rectangle(maxWidth, 1, 20, maxHeight*2, {
+    isStatic: true,
+    friction: 0,
+    frictionAir: 0,
+    frictionStick: 0,
+  });
+  let wallTop = Bodies.rectangle(1, 1, maxWidth*2, 20, {
+    isStatic: true,
+    friction: 0,
+    frictionAir: 0,
+    frictionStick: 0,
+  });
+
+  let boundaryBottom = Bodies.rectangle(1, (maxHeight)-0, maxWidth*2, 20, {
+    isStatic: true,
+    friction: 0,
+    frictionAir: 0,
+    frictionStick: 0,
+  });
+
+
   let paddle = Bodies.rectangle(200, 850, paddleWidth, paddleHeight, {
     render: { fillStyle: '#ccc', },
     inertia: Infinity,
     mass: Infinity,
     restitution: 0,
+    density: Infinity,
+    friction: 0,
+    frictionAir: 0,
+    frictionStick: 0,
     });
   // Matter.Body.setStatic(paddle, true);
 
-  let ball = Bodies.circle(250, 0, 10, {
-    restitution: 1, 
+  let ball = Bodies.circle(250, 50, 10, {
+    restitution: 1.1, 
     render: {
       fillStyle: 'blue',
     },
-    frictionAir: 0
+    frictionAir: 0,
+    friction:0,
+    density:0.0001,
+    frictionStick: 0,
+
   })
 
   useEffect(() => {
@@ -45,6 +83,9 @@ export const MatterStepOne = () => {
         height: maxHeight,
         background: 'rgba(100, 100, 100, 0.5)',
         wireframes: false,
+        showAngleIndicator: true,
+        showCollisions: true,
+        showVelocity: true,
       },
     })
 
@@ -62,6 +103,10 @@ export const MatterStepOne = () => {
           )
     }
 
+    World.add(engine.world, [wallTop])
+    World.add(engine.world, [wallLeft])
+    World.add(engine.world, [wallRight])
+    World.add(engine.world, [boundaryBottom])
 
     World.add(engine.world, [ball])
     World.add(engine.world, [paddle])
@@ -75,7 +120,7 @@ export const MatterStepOne = () => {
   function setBallInMotion() {
 
     console.log(ball.position.x, ball.position.y);
-    Matter.Body.applyForce( ball, {x: ball.position.x, y: ball.position.y}, {x: 0, y: 0.001})
+    Matter.Body.applyForce( ball, {x: ball.position.x, y: ball.position.y}, {x: 0, y: 0.0003})
   }
 
  
