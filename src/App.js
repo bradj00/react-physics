@@ -12,6 +12,7 @@ const Styles = {
     display:'flex',
     marginLeft:'10px',
     marginTop:'5px',
+    cursor:'none',
   }
 
 }

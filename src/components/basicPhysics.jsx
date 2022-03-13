@@ -8,6 +8,8 @@ export const MatterStepOne = () => {
 
   const maxHeight = 900;
   const maxWidth = 1900;
+  const paddleHeight = 20;
+  const paddleWidth = 150;
 
   let Engine = Matter.Engine
   let Render = Matter.Render
@@ -15,7 +17,7 @@ export const MatterStepOne = () => {
   let Bodies = Matter.Bodies
   let engine = Engine.create({})
   
-  let paddle = Bodies.rectangle(200, 850, 150, 20, {
+  let paddle = Bodies.rectangle(200, 850, paddleWidth, paddleHeight, {
     render: { fillStyle: '#ccc', },
     inertia: Infinity,
     mass: Infinity,
@@ -84,7 +86,17 @@ export const MatterStepOne = () => {
     if (y < (maxHeight - 150) ){
       y = maxHeight - 150;
     }
-    Matter.Body.setPosition(paddle,  { x: event.clientX, y: y });
+    else if (y > (maxHeight - paddleHeight)) {
+      y = maxHeight - paddleHeight;
+    }
+    if (x < (paddleWidth/2) ){
+      x = paddleWidth/2;
+    }
+    else if (x > (maxWidth - (paddleWidth/2))) {
+      x = (maxWidth - (paddleWidth/2));
+    }
+
+    Matter.Body.setPosition(paddle,  { x: x, y: y });
     // paddle.position.x = event.clientX;
     // Matter.Body.setStatic(paddle, true);
     // paddle.position.y = event.clientY;
