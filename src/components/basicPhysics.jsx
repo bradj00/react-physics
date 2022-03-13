@@ -2,7 +2,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import Matter from 'matter-js'
 
-
 export const MatterStepOne = () => {
   const [containerBackgroundColor, setContainerBackgroundColor] = useState('rgba(120,250,80,1)');
 
@@ -22,23 +21,57 @@ export const MatterStepOne = () => {
 
 
   })
-  
+  function createLevel(){
+    console.log('creating level...');
+    //static for now. Should get more challenging over time
+    let rowHeight   = 12; //12 bricks high
+    let rowWidth    = 20; //20 bricks wide
+
+    let brickArray = [];
+    //create an array of Rectangle blocks:
+    
+    for (let i = 1; i < (rowHeight); i++){
+    // for (let i = 1; i < (2); i++){
+        let rowArray = [];
+        for (let q = 1; q < (rowWidth); q++){
+            rowArray.push(
+                // Bodies.rectangle(x, y, 20, ((maxWidth/rowWidth)*.9), {
+                Bodies.rectangle( (maxWidth/rowWidth)*q, ((maxHeight/2)/rowHeight)*i,  ((maxWidth/rowWidth)*.9), 20, {
+                    // label:'some brick',
+                    isStatic: true,
+                    friction: 0,
+                    frictionAir: 0,
+                    frictionStick: 0,
+                    render: { fillStyle: '#000', },
+                  })
+            )
+        }
+        // console.log(rowArray);
+        World.add(engine.world, rowArray)
+        // brickArray.push(rowArray);
+    }
+    
+}
+
+
+
+
   let wallLeft = Bodies.rectangle(1, 1, 20, maxHeight*2, {
-    label:'left wall',
+    label:'Lwall',
     isStatic: true,
     friction: 0,
     frictionAir: 0,
     frictionStick: 0,
   });
   let wallRight = Bodies.rectangle(maxWidth, 1, 20, maxHeight*2, {
-    label:'right wall',
+    label:'Rwall',
     isStatic: true,
     friction: 0,
     frictionAir: 0,
     frictionStick: 0,
   });
   let wallTop = Bodies.rectangle(1, 1, maxWidth*2, 20, {
-    label:'top wall',
+    label:'Twall',
     isStatic: true,
     friction: 0,
     frictionAir: 0,
@@ -46,7 +79,7 @@ export const MatterStepOne = () => {
   });
 
   let boundaryBottom = Bodies.rectangle(1, (maxHeight)-0, maxWidth*2, 20, {
-    label:'bottom wall',
+    label:'Bwall',
     isStatic: true,
     friction: 0,
     frictionAir: 0,
@@ -55,7 +88,7 @@ export const MatterStepOne = () => {
 
 
   let paddle = Bodies.rectangle(200, 850, paddleWidth, paddleHeight, {
-    render: { fillStyle: '#ccc', },
+    render: { fillStyle: '#000', },
     label:'paddle',
     inertia: Infinity,
     mass: Infinity,
@@ -67,7 +100,7 @@ export const MatterStepOne = () => {
     });
   // Matter.Body.setStatic(paddle, true);
 
-  let ball = Bodies.circle(250, 50, 10, {
+  let ball = Bodies.circle(250, maxHeight-150, 10, {
     label:'ball',
     restitution: 1.1, 
     render: {
@@ -126,24 +159,30 @@ export const MatterStepOne = () => {
     engine.gravity.y = 0;
     Engine.run(engine)
     Render.run(render)
+    createLevel();
   }, [])
 
 
   function setBallInMotion() {
     console.log(ball.position.x, ball.position.y);
-    Matter.Body.applyForce( ball, {x: ball.position.x, y: ball.position.y}, {x: 0.0003, y: 0.0003})
+    Matter.Body.applyForce( ball, {x: ball.position.x, y: ball.position.y}, {x: 0.0008, y: 0.0005})
   }
 
   Matter.Events.on(engine, 'collisionStart', function(event) {
-    // console.log('COLLISION: ',event.pairs[0]);
-    console.log('render: ', render);
+    console.log('COLLISION: ',event.pairs[0]);
+    let labelA = event.pairs[0].bodyA.label;
+    let labelB = event.pairs[0].bodyB.label;
+
     // event.pairs[0].bodyA.render.fillStyle="red";
-    // event.pairs[0].bodyB.render.fillStyle="red";
-    let a = getRandomInt(255);
-    let b = getRandomInt(255);
-    let c = getRandomInt(255);
-    console.log(a,b,c);
-    render.options.background = 'rgba('+a+','+b+','+c+',0.4)';
+    
+    if ((labelA != 'ball') && (labelA != 'paddle') && (labelA != 'Lwall') && (labelA != 'Rwall') && (labelA != 'Bwall')&& (labelA != 'Twall') ){
+      World.remove(engine.world, event.pairs[0].bodyA);
+    }
+    
+    if ((labelB != 'ball') && (labelB != 'paddle') && (labelB != 'Lwall') && (labelB != 'Rwall') && (labelB != 'Bwall')&& (labelB != 'Twall') ){
+      World.remove(engine.world, event.pairs[0].bodyB);
+    }
+    
 
 
   });
