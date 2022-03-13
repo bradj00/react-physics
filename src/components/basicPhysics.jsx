@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import Matter from 'matter-js'
 
 export const MatterStepOne = () => {
-  const [containerBackgroundColor, setContainerBackgroundColor] = useState('rgba(120,250,80,1)');
+  const [containerBackgroundColor, setContainerBackgroundColor] = useState('rgba(115,11,222,1)');
 
   const boxRef = useRef(null)
   const canvasRef = useRef(null)
@@ -42,7 +42,7 @@ export const MatterStepOne = () => {
                     friction: 0,
                     frictionAir: 0,
                     frictionStick: 0,
-                    render: { fillStyle: '#000', },
+                    render: { fillStyle: 'rgba(222,180,11, 1)', },
                   })
             )
         }
@@ -88,7 +88,7 @@ export const MatterStepOne = () => {
 
 
   let paddle = Bodies.rectangle(200, 850, paddleWidth, paddleHeight, {
-    render: { fillStyle: '#000', },
+    render: { fillStyle: 'rgba(0,0,100,1)', },
     label:'paddle',
     inertia: Infinity,
     mass: Infinity,
@@ -104,7 +104,7 @@ export const MatterStepOne = () => {
     label:'ball',
     restitution: 1.1, 
     render: {
-      fillStyle: 'blue',
+      fillStyle: 'rgba(0,0,50,1)',
     },
     frictionAir: 0,
     friction:0,
