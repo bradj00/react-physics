@@ -35,6 +35,8 @@ export const MatterStepOne = () => {
     // for (let i = 1; i < (2); i++){
         let rowArray = [];
         for (let q = 1; q < (rowWidth); q++){
+            let randomExistence = getRandomInt(100);
+            if (randomExistence > 60){continue;}
             rowArray.push(
                 // Bodies.rectangle(x, y, 20, ((maxWidth/rowWidth)*.9), {
                 Bodies.rectangle( (maxWidth/rowWidth)*q, ((maxHeight/2)/rowHeight)*i,  ((maxWidth/rowWidth)*.9), 20, {
