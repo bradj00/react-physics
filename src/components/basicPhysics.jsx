@@ -21,6 +21,7 @@ export const MatterStepOne = () => {
 
 
   })
+
   function createLevel(){
     console.log('creating level...');
     //static for now. Should get more challenging over time
@@ -50,27 +51,28 @@ export const MatterStepOne = () => {
         World.add(engine.world, rowArray)
         // brickArray.push(rowArray);
     }
-    
+    engine.positionIterations = 60;
+    engine.velocityIterations = 60;
 }
 
 
 
 
-  let wallLeft = Bodies.rectangle(1, 1, 20, maxHeight*2, {
+  let wallLeft = Bodies.rectangle(-100, 1, 200, maxHeight*2, {
     label:'Lwall',
     isStatic: true,
     friction: 0,
     frictionAir: 0,
     frictionStick: 0,
   });
-  let wallRight = Bodies.rectangle(maxWidth, 1, 20, maxHeight*2, {
+  let wallRight = Bodies.rectangle(maxWidth+100, 1, 200, maxHeight*2, {
     label:'Rwall',
     isStatic: true,
     friction: 0,
     frictionAir: 0,
     frictionStick: 0,
   });
-  let wallTop = Bodies.rectangle(1, 1, maxWidth*2, 20, {
+  let wallTop = Bodies.rectangle(1, -100, maxWidth*2, 200, {
     label:'Twall',
     isStatic: true,
     friction: 0,
@@ -78,7 +80,7 @@ export const MatterStepOne = () => {
     frictionStick: 0,
   });
 
-  let boundaryBottom = Bodies.rectangle(1, (maxHeight)-0, maxWidth*2, 20, {
+  let boundaryBottom = Bodies.rectangle(1, (maxHeight)+100, maxWidth*2, 200, {
     label:'Bwall',
     isStatic: true,
     friction: 0,
@@ -87,7 +89,7 @@ export const MatterStepOne = () => {
   });
 
 
-  let paddle = Bodies.rectangle(200, 850, paddleWidth, paddleHeight, {
+  let paddle = Bodies.rectangle(200, 650, paddleWidth, paddleHeight, {
     render: { fillStyle: 'rgba(0,0,100,1)', },
     label:'paddle',
     inertia: Infinity,
@@ -127,9 +129,9 @@ export const MatterStepOne = () => {
         height: maxHeight,
         background: 'rgba(100, 100, 100, 0.5)',
         wireframes: false,
-        showAngleIndicator: true,
-        showCollisions: true,
-        showVelocity: true,
+        showAngleIndicator: false,
+        showCollisions: false,
+        showVelocity: false,
         background: containerBackgroundColor,
       },
     })
@@ -162,11 +164,33 @@ export const MatterStepOne = () => {
     createLevel();
   }, [])
 
-
   function setBallInMotion() {
     console.log(ball.position.x, ball.position.y);
     Matter.Body.applyForce( ball, {x: ball.position.x, y: ball.position.y}, {x: 0.0008, y: 0.0005})
+    console.log('iterations: ',engine.positionIterations );
   }
+
+  const limitMaxSpeed = () => {
+    let maxSpeed = 15;
+    if (ball.velocity.x > maxSpeed) {
+        Matter.Body.setVelocity(ball, { x: maxSpeed, y: ball.velocity.y });
+    }
+
+    if (ball.velocity.x < -maxSpeed) {
+      Matter.Body.setVelocity(ball, { x: -maxSpeed, y: ball.velocity.y });
+    }
+
+    if (ball.velocity.y > maxSpeed) {
+      Matter.Body.setVelocity(ball, { x: ball.velocity.x, y: maxSpeed });
+    }
+
+    if (ball.velocity.y < -maxSpeed) {
+      Matter.Body.setVelocity(ball, { x: -ball.velocity.x, y: -maxSpeed });
+    }
+}
+Matter.Events.on(engine, 'beforeUpdate', limitMaxSpeed);
+
+
 
   Matter.Events.on(engine, 'collisionStart', function(event) {
     console.log('COLLISION: ',event.pairs[0]);
