@@ -12,6 +12,7 @@ export const PlayerInfo = React.createContext({});
 
 const Styles = {
   window:{
+    
     position:'absolute',
     width:'100%',
     height:'100%',
@@ -19,6 +20,7 @@ const Styles = {
     userSelect:'none'
   },
   container: {
+    
     position:'absolute',
     top:'14%',
     height:'85%',
