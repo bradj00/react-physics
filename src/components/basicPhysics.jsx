@@ -1,9 +1,14 @@
 // MatterStepOne.js
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useContext} from 'react'
 import Matter from 'matter-js'
+import {PlayerInfo} from '../App.js';
 
 export const MatterStepOne = () => {
   const [containerBackgroundColor, setContainerBackgroundColor] = useState('rgba(115,11,222,1)');
+ 
+  const {playerCurrentScore}      = useContext(PlayerInfo);
+  const {setPlayerCurrentScore}   = useContext(PlayerInfo);
+  const {thePlayerCurrentScore}   = useContext(PlayerInfo);
 
   const boxRef = useRef(null)
   const canvasRef = useRef(null)
@@ -22,30 +27,33 @@ export const MatterStepOne = () => {
 
   })
 
+  let rowArray = []; //declared in larger scope so we can check if all bricks have been destroyed
   function createLevel(){
     console.log('creating level...');
     //static for now. Should get more challenging over time
     let rowHeight   = 12; //12 bricks high
     let rowWidth    = 20; //20 bricks wide
 
-    let brickArray = [];
     //create an array of Rectangle blocks:
+    let brickArray  = [];
+    let brickColors = ['blue','cyan','green','magenta','red','yellow','orange','gray'];
     
     for (let i = 1; i < (rowHeight); i++){
     // for (let i = 1; i < (2); i++){
-        let rowArray = [];
+        
         for (let q = 1; q < (rowWidth); q++){
             let randomExistence = getRandomInt(100);
-            if (randomExistence > 60){continue;}
+            if (randomExistence > 70){continue;}
+
+            let randomBrickColor = getRandomInt(7);
+
             rowArray.push(
                 // Bodies.rectangle(x, y, 20, ((maxWidth/rowWidth)*.9), {
                 Bodies.rectangle( (maxWidth/rowWidth)*q, ((maxHeight/2)/rowHeight)*i,  ((maxWidth/rowWidth)*.9), 20, {
-                    // label:'some brick',
+                    label:'brick',
                     isStatic: true,
-                    friction: 0,
-                    frictionAir: 0,
-                    frictionStick: 0,
-                    render: { fillStyle: 'rgba(222,180,11, 1)', },
+
+                    render: { fillStyle: brickColors[randomBrickColor], },
                   })
             )
         }
@@ -53,11 +61,9 @@ export const MatterStepOne = () => {
         World.add(engine.world, rowArray)
         // brickArray.push(rowArray);
     }
-    engine.positionIterations = 60;
-    engine.velocityIterations = 60;
+    engine.positionIterations = 10;
+    engine.velocityIterations = 10;
 }
-
-
 
 
   let wallLeft = Bodies.rectangle(-100, 1, 200, maxHeight*2, {
@@ -66,6 +72,8 @@ export const MatterStepOne = () => {
     friction: 0,
     frictionAir: 0,
     frictionStick: 0,
+    restitution: 1,
+    inertia: Infinity,
   });
   let wallRight = Bodies.rectangle(maxWidth+100, 1, 200, maxHeight*2, {
     label:'Rwall',
@@ -73,6 +81,8 @@ export const MatterStepOne = () => {
     friction: 0,
     frictionAir: 0,
     frictionStick: 0,
+    restitution: 1,
+    inertia: Infinity,
   });
   let wallTop = Bodies.rectangle(1, -100, maxWidth*2, 200, {
     label:'Twall',
@@ -80,6 +90,8 @@ export const MatterStepOne = () => {
     friction: 0,
     frictionAir: 0,
     frictionStick: 0,
+    restitution: 1,
+    inertia: Infinity,
   });
 
   let boundaryBottom = Bodies.rectangle(1, (maxHeight)+100, maxWidth*2, 200, {
@@ -88,32 +100,32 @@ export const MatterStepOne = () => {
     friction: 0,
     frictionAir: 0,
     frictionStick: 0,
+    restitution: 1,
+    inertia: Infinity,
   });
 
 
   let paddle = Bodies.rectangle(200, 650, paddleWidth, paddleHeight, {
-    render: { fillStyle: 'rgba(0,0,100,1)', },
+    render: { fillStyle: '#bbb', },
     label:'paddle',
     inertia: Infinity,
     mass: Infinity,
-    restitution: 0,
-    density: Infinity,
-    friction: 0,
-    frictionAir: 0,
-    frictionStick: 0,
+    restitution: 1,
+    density: 1,
+
     });
   // Matter.Body.setStatic(paddle, true);
 
   let ball = Bodies.circle(250, maxHeight-150, 10, {
     label:'ball',
-    restitution: 1.1, 
+    restitution: 1, 
     render: {
-      fillStyle: 'rgba(0,0,50,1)',
+      fillStyle: 'rgba(255,255,255,1)',
     },
     frictionAir: 0,
     friction:0,
-    density:0.0001,
-    frictionStick: 0,
+    density:0.004,
+    inertia: Infinity,
 
   })
 
@@ -134,23 +146,13 @@ export const MatterStepOne = () => {
         showAngleIndicator: false,
         showCollisions: false,
         showVelocity: false,
-        background: containerBackgroundColor,
+        // background: containerBackgroundColor,
+        background: 'linear-gradient(0deg, rgba(51,49,180,0.9752275910364145) 0%, rgba(0,0,10,1) 100%, rgba(24,24,24,0.9304096638655462) 100%)',
       },
     })
 
    
 
-    let ballArray = [];          
-    for (let i = 0; i < 100; i++){
-        ballArray.push(
-            Bodies.circle(10*i+200, 0, 10, {
-                restitution: 0.9,
-                render: {
-                fillStyle: '#00ff00',
-                },
-            })
-          )
-    }
 
     World.add(engine.world, [wallTop])
     World.add(engine.world, [wallLeft])
@@ -168,7 +170,7 @@ export const MatterStepOne = () => {
 
   function setBallInMotion() {
     console.log(ball.position.x, ball.position.y);
-    Matter.Body.applyForce( ball, {x: ball.position.x, y: ball.position.y}, {x: 0.0008, y: 0.0005})
+    Matter.Body.applyForce( ball, {x: ball.position.x, y: ball.position.y}, {x: 1, y: 0.15})
     console.log('iterations: ',engine.positionIterations );
   }
 
@@ -195,20 +197,36 @@ Matter.Events.on(engine, 'beforeUpdate', limitMaxSpeed);
 
 
   Matter.Events.on(engine, 'collisionStart', function(event) {
-    console.log('COLLISION: ',event.pairs[0]);
+    
     let labelA = event.pairs[0].bodyA.label;
     let labelB = event.pairs[0].bodyB.label;
-
+    
     // event.pairs[0].bodyA.render.fillStyle="red";
     
-    if ((labelA != 'ball') && (labelA != 'paddle') && (labelA != 'Lwall') && (labelA != 'Rwall') && (labelA != 'Bwall')&& (labelA != 'Twall') ){
+    // if ((labelA != 'ball') && (labelA != 'paddle') && (labelA != 'Lwall') && (labelA != 'Rwall') && (labelA != 'Bwall')&& (labelA != 'Twall') ){
+      if (labelA == 'brick'){
       World.remove(engine.world, event.pairs[0].bodyA);
+      Matter.Composite.remove(engine.world, event.pairs[0].bodyA);
+      setPlayerCurrentScore(playerCurrentScore => playerCurrentScore + 50);
+      // thePlayerCurrentScore.current = thePlayerCurrentScore.current + 50;
+      // console.log('new score: ',thePlayerCurrentScore.current);
+      // event.pairs[0].bodyA.position.x = -99999;
+      // console.log('Removing: ',event.pairs[0].bodyA.render.fillStyle);
+      // rowArray.pop();
+      // console.log('length: ',rowArray.length);
     }
     
-    if ((labelB != 'ball') && (labelB != 'paddle') && (labelB != 'Lwall') && (labelB != 'Rwall') && (labelB != 'Bwall')&& (labelB != 'Twall') ){
+    // if ((labelB != 'ball') && (labelB != 'paddle') && (labelB != 'Lwall') && (labelB != 'Rwall') && (labelB != 'Bwall')&& (labelB != 'Twall') ){
+    if (labelB == 'brick'){
       World.remove(engine.world, event.pairs[0].bodyB);
+      Matter.Composite.remove(engine.world, event.pairs[0].bodyB);
+
+      setPlayerCurrentScore(playerCurrentScore => playerCurrentScore + 50);
+
     }
-    
+    // if (rowArray.length < 1){
+    //   createLevel();
+    // }
 
 
   });
