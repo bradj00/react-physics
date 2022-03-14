@@ -1,6 +1,9 @@
 # BrickBreak in React using Matter.JS and web3 
 A mini-game in progress recreating BrickBreak in a React framework. This uses:
 
+![alt text](https://github.com/bradj00/react-physics/blob/master/screenshots/mainGame.png?raw=true)
+
+
 * Matter.JS for physics calculations
 
 * p5.JS for realtime rendering
