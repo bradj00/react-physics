@@ -1,5 +1,7 @@
 # BrickBreak in React using Matter.JS and web3 
-A mini-game in progress recreating BrickBreak in a React framework. This uses:
+A mini-game in progress recreating BrickBreak in a React framework. 
+
+This uses:
 
 * Matter.JS for physics calculations
 
@@ -8,6 +10,8 @@ A mini-game in progress recreating BrickBreak in a React framework. This uses:
 * web3.JS for Ethereum wallet integration and high scores
 
 * Moralis SDK for data rich stats and realtime events
+
+![alt text](https://github.com/bradj00/react-physics/blob/master/screenshots/mainGame.png?raw=true)
 
 
 
