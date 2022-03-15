@@ -290,7 +290,9 @@ export const MatterStepOne = () => {
     const tags = { groupId: "some-group-id" };
     const thisMoralisFile = new Moralis.File('batman.jpeg', { base64: nftImage });
     console.log('saving to ipfs...');
-    await thisMoralisFile.saveIPFS();
+    await thisMoralisFile.saveIPFS(function(data){
+      console.log('ok got some data back: ',data);
+    });
     console.log('saved to IPFS!', thisMoralisFile); 
     
     
