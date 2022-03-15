@@ -63,7 +63,7 @@ export const MatterStepOne = () => {
     }
     engine.positionIterations = 10;
     engine.velocityIterations = 10;
-}
+  }
 
 
   let wallLeft = Bodies.rectangle(-100, 1, 200, maxHeight*2, {
@@ -169,9 +169,8 @@ export const MatterStepOne = () => {
   }, [])
 
   function setBallInMotion() {
-    console.log(ball.position.x, ball.position.y);
     Matter.Body.applyForce( ball, {x: ball.position.x, y: ball.position.y}, {x: 1, y: 0.15})
-    console.log('iterations: ',engine.positionIterations );
+    console.log(Matter.Composite.allBodies(engine.world),Matter.Composite.get(engine.world, 12, 'rectangle'));
   }
 
   const limitMaxSpeed = () => {
@@ -191,8 +190,8 @@ export const MatterStepOne = () => {
     if (ball.velocity.y < -maxSpeed) {
       Matter.Body.setVelocity(ball, { x: -ball.velocity.x, y: -maxSpeed });
     }
-}
-Matter.Events.on(engine, 'beforeUpdate', limitMaxSpeed);
+  }
+  Matter.Events.on(engine, 'beforeUpdate', limitMaxSpeed);
 
 
 
@@ -203,31 +202,19 @@ Matter.Events.on(engine, 'beforeUpdate', limitMaxSpeed);
     
     // event.pairs[0].bodyA.render.fillStyle="red";
     
-    // if ((labelA != 'ball') && (labelA != 'paddle') && (labelA != 'Lwall') && (labelA != 'Rwall') && (labelA != 'Bwall')&& (labelA != 'Twall') ){
-      if (labelA == 'brick'){
+    if (labelA == 'brick'){
       World.remove(engine.world, event.pairs[0].bodyA);
       Matter.Composite.remove(engine.world, event.pairs[0].bodyA);
       setPlayerCurrentScore(playerCurrentScore => playerCurrentScore + 50);
-      // thePlayerCurrentScore.current = thePlayerCurrentScore.current + 50;
-      // console.log('new score: ',thePlayerCurrentScore.current);
-      // event.pairs[0].bodyA.position.x = -99999;
-      // console.log('Removing: ',event.pairs[0].bodyA.render.fillStyle);
-      // rowArray.pop();
-      // console.log('length: ',rowArray.length);
+      // console.log('removing: ',event.pairs[0].bodyA)
     }
     
-    // if ((labelB != 'ball') && (labelB != 'paddle') && (labelB != 'Lwall') && (labelB != 'Rwall') && (labelB != 'Bwall')&& (labelB != 'Twall') ){
     if (labelB == 'brick'){
       World.remove(engine.world, event.pairs[0].bodyB);
       Matter.Composite.remove(engine.world, event.pairs[0].bodyB);
-
       setPlayerCurrentScore(playerCurrentScore => playerCurrentScore + 50);
-
+      // console.log('removing: ',event.pairs[0].bodyB)
     }
-    // if (rowArray.length < 1){
-    //   createLevel();
-    // }
-
 
   });
 
@@ -238,22 +225,23 @@ Matter.Events.on(engine, 'beforeUpdate', limitMaxSpeed);
 
 
   function movePaddle(event) {
-
+    
     var x = event.clientX;
     var y = event.clientY;
-    if (y < (maxHeight - 150) ){
-      y = maxHeight - 150;
-    }else if (y > (maxHeight - paddleHeight)) {
-      y = maxHeight - paddleHeight;
-    }
+    // if (y < (maxHeight - 150) ){
+    //   y = maxHeight - 150;
+    // }else if (y > (maxHeight - paddleHeight)) {
+    //   y = maxHeight - paddleHeight;
+    // }
 
-    if (x < ((paddleWidth/2)+20) ){
-      x = (paddleWidth/2)+20;
-    }else if ( x > (maxWidth - ((paddleWidth/2)+20 )) ) {
-      x = (maxWidth - ((paddleWidth/2)+20 ) );
-    }
-
-    Matter.Body.setPosition(paddle,  { x: x, y: y });
+    // if (x < ((paddleWidth/2)+20) ){
+    //   x = (paddleWidth/2)+20;
+    // }else if ( x > (maxWidth - ((paddleWidth/2)+20 )) ) {
+    //   x = (maxWidth - ((paddleWidth/2)+20 ) );
+    // }
+    Matter.Body.set(paddle, "position", {x: event.clientX, y: event.clientY})
+    // Matter.Body.setPosition(paddle,  { x: x, y: y });
+    // console.log('set position: ',event.clientX,event.clientY, paddle);
   }
 
   return (
@@ -264,7 +252,7 @@ Matter.Events.on(engine, 'beforeUpdate', limitMaxSpeed);
         height: maxHeight,
       }}
       onMouseMove={(e)=>{movePaddle(e)}}
-      onClick={()=>{setBallInMotion()}}
+      onClick={(e)=>{setBallInMotion()}}
     >
       <canvas ref={canvasRef} />
     </div>

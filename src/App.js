@@ -1,5 +1,4 @@
-import logo from './logo.svg';
-import './App.css';
+import { MoralisProvider } from "react-moralis";
 import BasicPhysics from "./components/basicPhysics";
 import PlayerBar from "./components/PlayerBar";
 import PlayerScore from './components/PlayerScore';
@@ -69,35 +68,35 @@ const Styles = {
     right:'2%',
   }
 
-}
+} 
 
 function App() {
 
   const [playerCurrentScore, setPlayerCurrentScore] = useState(0);
   const thePlayerCurrentScore = useRef(0);
   return (
-    <>
-    <PlayerInfo.Provider value={{playerCurrentScore, setPlayerCurrentScore, thePlayerCurrentScore}} >
-      <div style={Styles.window}>
-        <div style={Styles.gameTitle}>
-          BRICK BREAK 2022 
-        </div>
-        <div style={Styles.playerScore}>
-          <PlayerScore />
-        </div>
-        <div style={Styles.playerBar}>
-          <PlayerBar />
-        </div>
-        <div style={Styles.topScores}>
-          <TopScores />
-        </div>
+    <MoralisProvider appId="T4UAVkZvsi8NqJNgFwmqIlYI1G8upaRdFNGCskQw" serverUrl="https://q4fwqhgor0rt.usemoralis.com:2053/server">
+      <PlayerInfo.Provider value={{playerCurrentScore, setPlayerCurrentScore, thePlayerCurrentScore}} >
+        <div style={Styles.window}>
+          <div style={Styles.gameTitle}>
+            BRICK BREAK 2022 
+          </div>
+          <div style={Styles.playerScore}>
+            <PlayerScore />
+          </div>
+          <div style={Styles.playerBar}>
+            <PlayerBar />
+          </div>
+          <div style={Styles.topScores}>
+            <TopScores />
+          </div>
 
-        <div style={Styles.container}>
-          <BasicPhysics />
+          <div style={Styles.container}>
+            <BasicPhysics />
+          </div>
         </div>
-      </div>
-    </PlayerInfo.Provider>
-    </>
+      </PlayerInfo.Provider>
+    </MoralisProvider>
   );
 }
 
