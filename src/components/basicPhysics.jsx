@@ -277,9 +277,34 @@ export const MatterStepOne = () => {
   //   console.log('MORALIS FILE: ',moralisFile)
   // },[moralisFile])
 
+ 
+  async function saveToTrophyRoom(){
+    // saveFile("batman.jpeg", nftImage, {
+    //   saveIPFS: true,
+    //   onSuccess: (data) =>{
+    //     console.log('succeed! ', data);
+    //   }
+    // });   
+       
+    const metadata = { createdById: "some-user-id" };
+    const tags = { groupId: "some-group-id" };
+    const thisMoralisFile = new Moralis.File('batman.jpeg', { base64: nftImage });
+    console.log('saving to ipfs...');
+    await thisMoralisFile.saveIPFS();
+    console.log('saved to IPFS!', thisMoralisFile); 
+    
+    
+    // console.log('saving file... ', thisMoralisFile); 
+ 
+    // saveFile("batman.jpeg", nftImage, { 
+    //   base64: true,
+    //   // metadata,
+    //   // tags, 
+    //   saveIPFS: true,
+    //   onSuccess: (result) => console.log(result.ipfs()),
+    //   onError: (error) => console.log('error: ',error),
+    // });
 
-  function saveToTrophyRoom(){
-    // saveFile("batman.jpeg", nftImage, { saveIPFS: true });    
   }  
 
   function resetGame(){
