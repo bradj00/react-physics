@@ -1,17 +1,50 @@
 // MatterStepOne.js
-import React, { useEffect, useState, useRef, useContext} from 'react'
+import React, {  useEffect, useState, useRef, createRef, useContext} from 'react'
 import Matter from 'matter-js'
-import {PlayerInfo} from '../App.js';
+import {PlayerInfo, cursorStyle} from '../App.js';
+import {useMoralis, useMoralisFile} from 'react-moralis';
+import { useScreenshot } from 'use-react-screenshot';
 
-export const MatterStepOne = () => {
+
+
+export const MatterStepOne = () => { 
+  const {Moralis, user, isAuthenticated} = useMoralis();
+  
   const [containerBackgroundColor, setContainerBackgroundColor] = useState('rgba(115,11,222,1)');
- 
-  const {playerCurrentScore}      = useContext(PlayerInfo);
-  const {setPlayerCurrentScore}   = useContext(PlayerInfo);
-  const {thePlayerCurrentScore}   = useContext(PlayerInfo);
+  
+  const {playerCurrentScore}          = useContext(PlayerInfo);
+  const {setPlayerCurrentScore}       = useContext(PlayerInfo);
+  const {thePlayerCurrentScore}       = useContext(PlayerInfo);
+  const {cursorStyle, setCursorStyle} = useContext(PlayerInfo);
 
-  const boxRef = useRef(null)
-  const canvasRef = useRef(null)
+  const [displayGameOverScreen, setDisplayGameOverScreen] = useState('none');
+  const [displayScreenshot, setDisplayScreenshot] = useState('none');
+
+  const gameOverRef = createRef(null)
+  const [nftImage, takeScreenshot] = useScreenshot()
+  const getNftScreenshot = () => takeScreenshot(gameOverRef.current)
+ 
+
+  const Styles = {  
+    gameOverBox: {
+      zIndex:'10',
+      border:'1px solid #00ff00',
+      position:'absolute',
+      display:'flex',
+      justifyContent:'center',
+      fontSize:'55px',
+      width:'65%',
+      height:'65%',
+      left:'18%',
+      top:'15%',
+      backgroundColor:'rgba(0,0,0,0.95)',
+      display: displayGameOverScreen,
+      borderRadius:'10px',
+    }
+  }
+
+  const boxRef      = useRef(null)
+  const canvasRef   = useRef(null)
 
   const maxHeight = window.innerHeight * 0.86;
   const maxWidth = window.innerWidth * 0.99;
@@ -23,8 +56,6 @@ export const MatterStepOne = () => {
   let World = Matter.World
   let Bodies = Matter.Bodies
   let engine = Engine.create({
-
-
   })
 
   let rowArray = []; //declared in larger scope so we can check if all bricks have been destroyed
@@ -61,8 +92,8 @@ export const MatterStepOne = () => {
         World.add(engine.world, rowArray)
         // brickArray.push(rowArray);
     }
-    engine.positionIterations = 10;
-    engine.velocityIterations = 10;
+    // engine.positionIterations = 10;
+    // engine.velocityIterations = 10;
   }
 
 
@@ -163,18 +194,19 @@ export const MatterStepOne = () => {
     World.add(engine.world, [paddle])
 
     engine.gravity.y = 0;
-    Engine.run(engine)
+    // Engine.run(engine)
+    Matter.Runner.run(engine);
     Render.run(render)
     createLevel();
-  }, [])
+  }, []) 
 
   function setBallInMotion() {
     Matter.Body.applyForce( ball, {x: ball.position.x, y: ball.position.y}, {x: 1, y: 0.15})
-    console.log(Matter.Composite.allBodies(engine.world),Matter.Composite.get(engine.world, 12, 'rectangle'));
+    // console.log(Matter.Composite.allBodies(engine.world),Matter.Composite.get(engine.world, 12, 'rectangle'));
   }
 
   const limitMaxSpeed = () => {
-    let maxSpeed = 15;
+    let maxSpeed = 3;
     if (ball.velocity.x > maxSpeed) {
         Matter.Body.setVelocity(ball, { x: maxSpeed, y: ball.velocity.y });
     }
@@ -193,8 +225,6 @@ export const MatterStepOne = () => {
   }
   Matter.Events.on(engine, 'beforeUpdate', limitMaxSpeed);
 
-
-
   Matter.Events.on(engine, 'collisionStart', function(event) {
     
     let labelA = event.pairs[0].bodyA.label;
@@ -205,46 +235,91 @@ export const MatterStepOne = () => {
     if (labelA == 'brick'){
       World.remove(engine.world, event.pairs[0].bodyA);
       Matter.Composite.remove(engine.world, event.pairs[0].bodyA);
-      setPlayerCurrentScore(playerCurrentScore => playerCurrentScore + 50);
+      // setPlayerCurrentScore(playerCurrentScore => playerCurrentScore + 50);
       // console.log('removing: ',event.pairs[0].bodyA)
     }
     
     if (labelB == 'brick'){
       World.remove(engine.world, event.pairs[0].bodyB);
       Matter.Composite.remove(engine.world, event.pairs[0].bodyB);
-      setPlayerCurrentScore(playerCurrentScore => playerCurrentScore + 50);
+      // setPlayerCurrentScore(playerCurrentScore => playerCurrentScore + 50);
       // console.log('removing: ',event.pairs[0].bodyB)
     }
-
+    if ((labelA == 'Bwall') || (labelB == 'Bwall') ){
+      doGameOver();
+    }
   });
 
-
+  function doGameOver(){
+    // console.log('GAME OVER ', engine.world);
+    Matter.Body.setPosition(ball, {x: 250, y: 600})
+    Matter.Runner.stop(engine);
+    Render.stop(render);
+    // console.log('ball: ',ball);
+    setDisplayGameOverScreen('flex');
+    setCursorStyle('default');
+  }
   function getRandomInt(max) {
     return Math.floor(Math.random() * max);
   }
 
+  const {
+    error,
+    isUploading,
+    moralisFile,
+    saveFile,
+  } = useMoralisFile();
+
+  // useEffect(()=>{
+  //   console.log('isUploading: ',isUploading)
+  // },[isUploading])
+  // useEffect(()=>{
+  //   console.log('MORALIS FILE: ',moralisFile)
+  // },[moralisFile])
+
+
+  function saveToTrophyRoom(){
+    // saveFile("batman.jpeg", nftImage, { saveIPFS: true });    
+  }  
+
+  function resetGame(){
+    //hide gameOverScreen
+    setDisplayGameOverScreen('none');
+    //reset scores
+    //createLevel();
+    //reset ball position;
+    // 250, maxHeight-150,
+    
+  }
 
   function movePaddle(event) {
     
     var x = event.clientX;
     var y = event.clientY;
-    // if (y < (maxHeight - 150) ){
-    //   y = maxHeight - 150;
-    // }else if (y > (maxHeight - paddleHeight)) {
-    //   y = maxHeight - paddleHeight;
-    // }
+    if (y < (maxHeight - 150) ){
+      y = maxHeight - 150;
+    }else if (y > (maxHeight - paddleHeight)) {
+      y = maxHeight - paddleHeight;
+    }
 
-    // if (x < ((paddleWidth/2)+20) ){
-    //   x = (paddleWidth/2)+20;
-    // }else if ( x > (maxWidth - ((paddleWidth/2)+20 )) ) {
-    //   x = (maxWidth - ((paddleWidth/2)+20 ) );
-    // }
-    Matter.Body.set(paddle, "position", {x: event.clientX, y: event.clientY})
+    if (x < ((paddleWidth/2)+5) ){
+      x = (paddleWidth/2)+5;
+    // }else if ( x > (maxWidth - ((paddleWidth/2)-200 )) ) {
+    }else if ( x > maxWidth-80 ) {
+      x = maxWidth-80 ;
+    }
+    Matter.Body.set(paddle, "position", {x: x, y: y})
     // Matter.Body.setPosition(paddle,  { x: x, y: y });
-    // console.log('set position: ',event.clientX,event.clientY, paddle);
+    // console.log('set position: ',x,y, paddle);
   }
-
-  return (
+  let userAddress='0x0000000000000000000000000000000000000000';
+  let polygonScanTarget='https://mumbai.polygonscan.com/address/0x0000000000000000000000000000000000000000';
+  
+  if (isAuthenticated){ 
+    userAddress = user.attributes.ethAddress
+    polygonScanTarget = 'https://mumbai.polygonscan.com/address/'+user.attributes.ethAddress;
+  }
+  return ( 
     <div
       ref={boxRef}
       style={{
@@ -255,8 +330,35 @@ export const MatterStepOne = () => {
       onClick={(e)=>{setBallInMotion()}}
     >
       <canvas ref={canvasRef} />
-    </div>
+      <div ref={gameOverRef} id="gameOverBox" style={Styles.gameOverBox}>
+        <div style={{position:'absolute', top:'7%'}}>
+          GAME OVER
+        </div>
+        <div style={{position:'absolute',color:'#ff0000',fontSize:'34px', top:'22%'}}>
+            10,620
+        </div>
+        <div id="stats" style={{fontSize:'18px', position:'absolute', top:'33%', left:'10%',width:'80%', height:'60%', border:'0px solid #00ff00'}}>
+          Stats:  
+          <div id="statsInfo" style={{ position:'absolute', width:'30%', left:'5%', top:'10%', color:'#00ff00',fontSize:'14px',lineHeight:'2'}}>
+            Bricks Destroyed: <span style={{color:'#ff2200', float:'right'}}>62</span><br></br>
+            Max Level:        <span style={{color:'#ff2200', float:'right' }}>1</span><br></br>
+            Ball Bounces:        <span style={{color:'#ff2200', float:'right' }}>4,602</span><br></br>
+            Time Elapsed:        <span style={{color:'#ff2200', float:'right' }}>13m 42s</span><br></br>
+          </div> 
+        </div> 
+        <div id="userAddress" style={{fontSize:'14px',position:'absolute',bottom:'20%',}}>
+          Player: <br></br><br></br>
+          <span >
+            <a style={{color:"#00ff00"}} href={polygonScanTarget}>{userAddress}</a>
+          </span>
+        </div> 
+        <img style={{display:{displayScreenshot},position:'absolute',bottom:'30%', right:'10%',}} width={350} height={200} src={nftImage} />
+        <button style={{height:'10%',position:'absolute',bottom:'5%',left:'35%'}} onClick={()=>{resetGame()}}>Play Again</button>
+        <button style={{height:'10%',position:'absolute',bottom:'5%',left:'45%'}} onClick={()=>{getNftScreenshot()}}>Get Screenshot</button>
+        <button style={{height:'10%',position:'absolute',bottom:'5%',left:'55%'}} onClick={()=>{saveToTrophyRoom()}}>Save to Trophy Room</button>
+      </div>
+    </div> 
   )
-}
+} 
 
 export default MatterStepOne;
