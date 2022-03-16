@@ -240,7 +240,7 @@ export const MatterStepOne = () => {
     let labelA = event.pairs[0].bodyA.label;
     let labelB = event.pairs[0].bodyB.label;
     
-    // event.pairs[0].bodyA.render.fillStyle="red";
+    // event.pairs[0].bodyA.render.fillStyle="red"; 
     
     if (labelA == 'brick'){
       World.remove(engine.world, event.pairs[0].bodyA);
@@ -271,11 +271,11 @@ export const MatterStepOne = () => {
   }
   function getRandomInt(max) {
     return Math.floor(Math.random() * max);
-  }
+  } 
 
   const {
     error,
-    isUploading,
+    isUploading, 
     moralisFile,
     saveFile,
   } = useMoralisFile();  
@@ -363,7 +363,7 @@ export const MatterStepOne = () => {
     userAddress = user.attributes.ethAddress;
     polygonScanTarget = 'https://mumbai.polygonscan.com/address/'+user.attributes.ethAddress+"#tokentxnsErc721";
   }
-  return ( 
+  return (   
     <div
       ref={boxRef}
       style={{
@@ -398,8 +398,8 @@ export const MatterStepOne = () => {
         </div> 
         <img style={{display:{displayScreenshot},position:'absolute',bottom:'30%', right:'10%',}} width={350} height={200} src={nftImage} />
         <button style={{height:'10%',position:'absolute',bottom:'5%',left:'35%'}} onClick={()=>{resetGame()}}>Play Again</button>
-        <button style={{height:'10%',position:'absolute',bottom:'5%',left:'45%'}} onClick={()=>{getNftScreenshot()}}>Get Screenshot</button>
-        <button style={{height:'10%',position:'absolute',bottom:'5%',left:'55%'}} onClick={()=>{saveToTrophyRoom()}}>Save to Trophy Room</button>
+        <button style={{height:'10%',position:'absolute',bottom:'5%',left:'43.7%'}} onClick={()=>{getNftScreenshot()}}>Get Screenshot</button>
+        <button style={{height:'10%',position:'absolute',bottom:'5%',left:'55%'}} onClick={()=>{saveToTrophyRoom()}}>Mint Trophy NFT</button>
       </div>
     </div> 
   )
