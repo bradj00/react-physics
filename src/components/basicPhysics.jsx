@@ -2,15 +2,15 @@
 import React, {  useEffect, useState, useRef, createRef, useContext} from 'react'
 import Matter from 'matter-js'
 import {PlayerInfo, cursorStyle} from '../App.js';
-import {useMoralis, useMoralisFile} from 'react-moralis';
+import {web3, isWeb3Enabled, useWeb3ExecuteFunction, useMoralis, useMoralisFile} from 'react-moralis';
 import { useScreenshot } from 'use-react-screenshot';
-
+import {contractAddress, contractAbi} from '../contracts/contractInfo.js';
 
 
 export const MatterStepOne = () => { 
-  const {Moralis, user, isAuthenticated} = useMoralis();
+  const {web3, enableWeb3, isWeb3Enabled, isWeb3EnableLoading, web3EnableError, Moralis, user, isAuthenticated} = useMoralis();
   
-  const [containerBackgroundColor, setContainerBackgroundColor] = useState('rgba(115,11,222,1)');
+  const [containerBackgroundColor, setContainerBackgroundColor] = useState('rgba(115,11,222,1)'); 
   
   const {playerCurrentScore}          = useContext(PlayerInfo);
   const {setPlayerCurrentScore}       = useContext(PlayerInfo);
@@ -24,6 +24,16 @@ export const MatterStepOne = () => {
   const [nftImage, takeScreenshot] = useScreenshot()
   const getNftScreenshot = () => takeScreenshot(gameOverRef.current)
  
+  const [tokenUriInfo , setTokenUriInfo] = useState();
+  const [userWallet, setUserWallet] = useState('0x0000000000000000000000000000000000000000');
+
+  //THE MAGIC SAUCE TO ENABLE WEB3
+  useEffect(() => {
+    if (!isWeb3Enabled) {
+      console.log('enabling web3...');
+      enableWeb3();
+    }
+    }, [web3]);
 
   const Styles = {  
     gameOverBox: {
@@ -270,13 +280,18 @@ export const MatterStepOne = () => {
     saveFile,
   } = useMoralisFile();  
 
-  // useEffect(()=>{
-  //   console.log('isUploading: ',isUploading)
-  // },[isUploading])
-  // useEffect(()=>{
-  //   console.log('MORALIS FILE: ',moralisFile)
-  // },[moralisFile])
-
+  // const { data, error, fetch, isFetching, isLoading } = useWeb3ExecuteFunction({
+  const mintNftInContract = useWeb3ExecuteFunction({ 
+    chain:'mumbai',
+    abi: contractAbi,
+    contractAddress: contractAddress,
+    functionName: "mintScreenshot",
+    params: { 
+        player: '0xF9108C5B2B8Ca420326cBdC91D27c075ea60B749',  
+        tokenURI: 'https://ipfs.moralis.io:2053/ipfs/QmaRQ1NSqEPsonr2BRPBYgayM78NMbY9DX7UZUU15zBxoP'
+        // tokenURI: tokenUriInfo
+    },
+  });
  
   async function saveToTrophyRoom(){
     // saveFile("batman.jpeg", nftImage, {
@@ -288,27 +303,20 @@ export const MatterStepOne = () => {
         
     const metadata = { createdById: "some-user-id" };
     const tags = { groupId: "some-group-id" };
-    const thisMoralisFile = new Moralis.File('batman.jpeg', { base64: nftImage });
+    const thisMoralisFile = new Moralis.File('batman.jpeg', { base64: nftImage }); 
     console.log('saving to ipfs...');
     await thisMoralisFile.saveIPFS(function(data){
       console.log('ok got some data back: ',data);
     });
-    console.log('saved to IPFS!', thisMoralisFile);
-    //thisMoralisFile can be the tokenURI when we call our mintScreenShot() contract function
-    //maybe add a timestamp inside the screenshot to make Trophy more memorable 
-    
-    
-    // console.log('saving file... ', thisMoralisFile); 
- 
-    // saveFile("batman.jpeg", nftImage, { 
-    //   base64: true,
-    //   // metadata,
-    //   // tags, 
-    //   saveIPFS: true,
-    //   onSuccess: (result) => console.log(result.ipfs()),
-    //   onError: (error) => console.log('error: ',error),
-    // });
-
+    console.log('saved to IPFS!', thisMoralisFile._ipfs); 
+    console.log('\n',contractAddress,contractAbi);
+    mintNftInContract.fetch({
+      onError: (error) =>{
+        console.log('big ERROR: ',error);
+      }
+    }
+    );
+    setTokenUriInfo(thisMoralisFile._ipfs);
   }  
 
   function resetGame(){
@@ -344,9 +352,16 @@ export const MatterStepOne = () => {
   let userAddress='0x0000000000000000000000000000000000000000';
   let polygonScanTarget='https://mumbai.polygonscan.com/address/0x0000000000000000000000000000000000000000';
   
+  useEffect(()=>{ 
+    if (user != null){
+      setUserWallet(user.attributes.ethAddress);
+    }
+  },[isAuthenticated])
+
   if (isAuthenticated){ 
-    userAddress = user.attributes.ethAddress
-    polygonScanTarget = 'https://mumbai.polygonscan.com/address/'+user.attributes.ethAddress;
+    
+    userAddress = user.attributes.ethAddress;
+    polygonScanTarget = 'https://mumbai.polygonscan.com/address/'+user.attributes.ethAddress+"#tokentxnsErc721";
   }
   return ( 
     <div
@@ -378,7 +393,7 @@ export const MatterStepOne = () => {
         <div id="userAddress" style={{fontSize:'14px',position:'absolute',bottom:'20%',}}>
           Player: <br></br><br></br>
           <span >
-            <a style={{color:"#00ff00"}} href={polygonScanTarget}>{userAddress}</a>
+            <a style={{color:"#00ff00"}} href={polygonScanTarget} target="blank">{userAddress}</a>
           </span>
         </div> 
         <img style={{display:{displayScreenshot},position:'absolute',bottom:'30%', right:'10%',}} width={350} height={200} src={nftImage} />
