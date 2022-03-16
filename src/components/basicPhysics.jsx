@@ -268,7 +268,7 @@ export const MatterStepOne = () => {
     isUploading,
     moralisFile,
     saveFile,
-  } = useMoralisFile();
+  } = useMoralisFile();  
 
   // useEffect(()=>{
   //   console.log('isUploading: ',isUploading)
@@ -285,7 +285,7 @@ export const MatterStepOne = () => {
     //     console.log('succeed! ', data);
     //   }
     // });   
-       
+        
     const metadata = { createdById: "some-user-id" };
     const tags = { groupId: "some-group-id" };
     const thisMoralisFile = new Moralis.File('batman.jpeg', { base64: nftImage });
@@ -293,7 +293,9 @@ export const MatterStepOne = () => {
     await thisMoralisFile.saveIPFS(function(data){
       console.log('ok got some data back: ',data);
     });
-    console.log('saved to IPFS!', thisMoralisFile); 
+    console.log('saved to IPFS!', thisMoralisFile);
+    //thisMoralisFile can be the tokenURI when we call our mintScreenShot() contract function
+    //maybe add a timestamp inside the screenshot to make Trophy more memorable 
     
     
     // console.log('saving file... ', thisMoralisFile); 
