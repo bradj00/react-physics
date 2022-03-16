@@ -12,7 +12,7 @@ const PlayerBar = () => {
       </div>
     )
   }else {
-    console.log(user);
+    // console.log(user);
     return (
       <div>
         <div>

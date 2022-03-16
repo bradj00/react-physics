@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { useNFTBalances, useWeb3ExecuteFunction, useMoralis, useMoralisFile} from 'react-moralis';
 import {contractAddress, contractAbi} from '../contracts/contractInfo.js';
-
+import {PlayerInfo, cursorStyle} from '../App.js';
+import TrophyDiv from './trophyDiv';
 
 const Styles = {
   container: {
@@ -16,20 +17,25 @@ const Styles = {
     position:'absolute',
     width:'85%',
     height:'70%',
-    border:'1px solid #00ff00',
+    border:'0px solid #00ff00',
     top:'15%',
+    display:'grid',
+    gridTemplateColumns: 'repeat(3, 1fr)',
+    gap: '10px',
     
   }
   
 }
 
 const TrophyRoom = () => { 
+  const {cursorStyle, setCursorStyle} = useContext(PlayerInfo);
   const {enableWeb3, web3, isWeb3Enabled} = useMoralis();
   // const { getNFTBalances, data, error, isLoading, isFetching } = useNFTBalances();
   const getUserNFTBalances = useNFTBalances();
   
   const  [maxNftId, setMaxNftId] = useState(0);
   const [trophyArray, setTrophyArray] = useState([]);
+  const [userNftArray, setUserNftArray] = useState([]);
   
 
   // { data, error, fetch, isFetching, isLoading }
@@ -57,31 +63,48 @@ const TrophyRoom = () => {
         }
       });
 
-      getUserNFTBalances.getNFTBalances({
-        onSuccess: (data) => {
-          console.log('user balances! ', data.result);
-        },
-        onError: (error) => {
-          console.log('error: ', error);
-        }
-      }); // Moralis call to database
+      
     },200);
   // }
-
+    setCursorStyle('default');
   },[]);
 
   useEffect(()=>{
-    console.log('maxNftId is now: ', maxNftId);
+    // console.log('maxNftId is now: ', maxNftId);
 
     //get trophy list and push to array
   },[maxNftId]);
 
+  useEffect(() => {
+    console.log('userNftArray ', userNftArray);
+  }, [userNftArray]);
+
+  function getNfts(){
+    getUserNFTBalances.getNFTBalances({
+      onSuccess: (data) => {
+        console.log('user balances! ', data.result);
+        setUserNftArray(data.result);
+      },
+      onError: (error) => {
+        console.log('error: ', error);
+      }
+    }); // Moralis call to database
+  }
   
   return (
     <div style={Styles.container}>
-        <span style={{position:'absolute',top:'5%',fontSize:'20px',}}>Trophy Room!</span>
+        <span style={{position:'absolute',top:'5%',fontSize:'20px',}}>
+          Trophy Room!<br></br><br></br>
+          <button onClick={()=>{getNfts()}}>Get Trophies from Database</button>
+        </span>
         <div style={Styles.trophyList}>
-          Trophies
+          
+          {
+            userNftArray.map((entry, index)=>{
+              return(<div key={index}><TrophyDiv trophyInfo={entry} /> </div>)
+              
+            })
+          }
         </div>
     </div>
   )

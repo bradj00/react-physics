@@ -208,12 +208,13 @@ export const MatterStepOne = () => {
     Matter.Runner.run(engine);
     Render.run(render)
     createLevel();
+    setCursorStyle('none'); 
   }, []) 
 
-  function setBallInMotion() {
+  function setBallInMotion() {  
     Matter.Body.applyForce( ball, {x: ball.position.x, y: ball.position.y}, {x: 1, y: 0.15})
     // console.log(Matter.Composite.allBodies(engine.world),Matter.Composite.get(engine.world, 12, 'rectangle'));
-  }
+  } 
 
   const limitMaxSpeed = () => {
     let maxSpeed = 3;
@@ -237,7 +238,7 @@ export const MatterStepOne = () => {
 
   Matter.Events.on(engine, 'collisionStart', function(event) {
     
-    let labelA = event.pairs[0].bodyA.label;
+    let labelA = event.pairs[0].bodyA.label; 
     let labelB = event.pairs[0].bodyB.label;
     
     // event.pairs[0].bodyA.render.fillStyle="red"; 
@@ -260,7 +261,7 @@ export const MatterStepOne = () => {
     }
   });
 
-  function doGameOver(){
+  function doGameOver(){ 
     // console.log('GAME OVER ', engine.world);
     Matter.Body.setPosition(ball, {x: 250, y: 600})
     Matter.Runner.stop(engine);
@@ -287,39 +288,34 @@ export const MatterStepOne = () => {
     contractAddress: contractAddress,
     functionName: "mintScreenshot",
     params: { 
-        player: '0xF9108C5B2B8Ca420326cBdC91D27c075ea60B749',  
-        tokenURI: 'https://ipfs.moralis.io:2053/ipfs/QmaRQ1NSqEPsonr2BRPBYgayM78NMbY9DX7UZUU15zBxoP'
-        // tokenURI: tokenUriInfo
+        // player: '0xF9108C5B2B8Ca420326cBdC91D27c075ea60B749',  
+        player: userWallet,  
+        // tokenURI: 'https://ipfs.moralis.io:2053/ipfs/QmaRQ1NSqEPsonr2BRPBYgayM78NMbY9DX7UZUU15zBxoP'
+        tokenURI: tokenUriInfo
     },
-  });
+  }); 
  
-  async function saveToTrophyRoom(){
-    // saveFile("batman.jpeg", nftImage, {
-    //   saveIPFS: true,
-    //   onSuccess: (data) =>{
-    //     console.log('succeed! ', data);
-    //   }
-    // });   
-        
-    const metadata = { createdById: "some-user-id" };
-    const tags = { groupId: "some-group-id" };
-    const thisMoralisFile = new Moralis.File('batman.jpeg', { base64: nftImage }); 
-    console.log('saving to ipfs...');
-    await thisMoralisFile.saveIPFS(function(data){
-      console.log('ok got some data back: ',data);
-    });
-    console.log('saved to IPFS!', thisMoralisFile._ipfs); 
-    console.log('\n',contractAddress,contractAbi);
-    mintNftInContract.fetch({
-      onError: (error) =>{
-        console.log('big ERROR: ',error);
+  async function saveToTrophyRoom(){ 
+      mintNftInContract.fetch({
+        onSuccess:(data) =>{
+          console.log('minted NFT! unconfimed TX: ',data);
+        },
+        onError: (error) =>{
+          console.log('big ERROR: ',error); 
+        }
       }
-    }
-    );
-    setTokenUriInfo(thisMoralisFile._ipfs);
+      );
   }  
 
-  function resetGame(){
+  async function saveToIPFS(){ 
+    const thisMoralisFile = new Moralis.File('nullTemp.jpeg', { base64: nftImage }); 
+    console.log('saving to ipfs...');
+    await thisMoralisFile.saveIPFS();
+    console.log('saved to IPFS!', thisMoralisFile._ipfs); 
+    setTokenUriInfo(thisMoralisFile._ipfs);
+  }
+
+  function resetGame(){ 
     //hide gameOverScreen
     setDisplayGameOverScreen('none');
     //reset scores
@@ -397,9 +393,10 @@ export const MatterStepOne = () => {
           </span>
         </div> 
         <img style={{display:{displayScreenshot},position:'absolute',bottom:'30%', right:'10%',}} width={350} height={200} src={nftImage} />
-        <button style={{height:'10%',position:'absolute',bottom:'5%',left:'35%'}} onClick={()=>{resetGame()}}>Play Again</button>
-        <button style={{height:'10%',position:'absolute',bottom:'5%',left:'43.7%'}} onClick={()=>{getNftScreenshot()}}>Get Screenshot</button>
-        <button style={{height:'10%',position:'absolute',bottom:'5%',left:'55%'}} onClick={()=>{saveToTrophyRoom()}}>Mint Trophy NFT</button>
+        <button style={{height:'10%',position:'absolute',bottom:'5%',left:'25%'}} onClick={()=>{resetGame()}}>Play Again</button>
+        <button style={{height:'10%',position:'absolute',bottom:'5%',left:'37%'}} onClick={()=>{getNftScreenshot()}}>Get Screenshot</button>
+        <button style={{height:'10%',position:'absolute',bottom:'5%',left:'50%'}} onClick={()=>{saveToIPFS()}}>Save to IPFS</button>
+        <button style={{height:'10%',position:'absolute',bottom:'5%',left:'60%'}} onClick={()=>{saveToTrophyRoom()}}>Mint Trophy NFT</button>
       </div>
     </div> 
   )
